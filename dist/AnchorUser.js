@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -22,6 +41,7 @@ const eosjs_numeric_1 = require("eosjs/dist/eosjs-numeric");
 const httpEndpoint = "https://wax.greymass.com";
 const node_fetch_1 = __importDefault(require("node-fetch")); //node only
 const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch: node_fetch_1.default });
+const _ = __importStar(require("lodash"));
 class CosignAuthorityProvider {
     getRequiredKeys(args) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -45,6 +65,9 @@ class CosignAuthorityProvider {
         });
     }
 }
+const authorization = [
+    { actor: "limitlesswx", permission: "cosign" },
+];
 //@ts-ignore
 const api = new eosjs_1.Api({
     rpc: rpc,
@@ -96,37 +119,48 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     const tx = Object.assign(Object.assign({}, transaction), info.getTransactionHeader(options.expireSeconds));
                     temp_transaction = tx;
                 }
-                var temp_braodcast = options.broadcast;
-                options.broadcast = false;
-                completedTransaction = yield this.session.transact(temp_transaction, options);
-                const request = {
-                    transaction: Array.from(completedTransaction.serializedTransaction),
-                };
-                const response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
-                    method: "POST",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(request),
+                console.log(temp_transaction.actions);
+                var need_sig = false;
+                Object.keys(temp_transaction.actions).forEach(function (key) {
+                    if (parseInt(key) >= 0) {
+                        if (_.isEqual(temp_transaction.actions[key]["authorization"], authorization)) {
+                            need_sig = true;
+                        }
+                    }
                 });
-                if (!response.ok) {
-                    const body = yield response.json();
-                    throw Error(body.reason || "Failed to connect to endpoint");
-                }
-                const json = yield response.json();
-                completedTransaction.signatures.push(json.sig[0]);
-                console.log("Pushing completed_transaction");
-                var data = {
-                    signatures: completedTransaction.signatures,
-                    compression: 0,
-                    serializedContextFreeData: undefined,
-                    serializedTransaction: completedTransaction.serializedTransaction,
-                };
-                options.broadcast = temp_braodcast;
-                var completed_transaction = completedTransaction;
-                if (temp_braodcast) {
-                    completed_transaction = yield api.rpc.send_transaction(data);
+                if (need_sig) {
+                    var temp_braodcast = options.broadcast;
+                    options.broadcast = false;
+                    completedTransaction = yield this.session.transact(temp_transaction, options);
+                    const request = {
+                        transaction: Array.from(completedTransaction.serializedTransaction),
+                    };
+                    const response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(request),
+                    });
+                    if (!response.ok) {
+                        const body = yield response.json();
+                        throw Error(body.reason || "Failed to connect to endpoint");
+                    }
+                    const json = yield response.json();
+                    completedTransaction.signatures.push(json.sig[0]);
+                    console.log("Pushing completed_transaction");
+                    var data = {
+                        signatures: completedTransaction.signatures,
+                        compression: 0,
+                        serializedContextFreeData: undefined,
+                        serializedTransaction: completedTransaction.serializedTransaction,
+                    };
+                    options.broadcast = temp_braodcast;
+                    var completed_transaction = completedTransaction;
+                    if (temp_braodcast) {
+                        completed_transaction = yield api.rpc.send_transaction(data);
+                    }
                 }
                 const wasBroadcast = options.broadcast !== false;
                 const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));

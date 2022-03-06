@@ -15,6 +15,7 @@ import { convertLegacyPublicKeys } from "eosjs/dist/eosjs-numeric";
 const httpEndpoint = "https://wax.greymass.com";
 import fetch from "node-fetch"; //node only
 const rpc = new JsonRpc(httpEndpoint, { fetch });
+import * as _ from "lodash";
 
 class CosignAuthorityProvider {
   async getRequiredKeys(args) {
@@ -41,6 +42,10 @@ class CosignAuthorityProvider {
     );
   }
 }
+
+const authorization: Array<Object> = [
+  { actor: "limitlesswx", permission: "cosign" },
+];
 
 //@ts-ignore
 const api = new Api({
@@ -114,47 +119,65 @@ export class AnchorUser extends User {
         };
         temp_transaction = tx;
       }
-      var temp_braodcast = options.broadcast;
-      options.broadcast = false;
 
-      completedTransaction = await this.session.transact(
-        temp_transaction,
-        options
-      );
-
-      const request = {
-        transaction: Array.from(completedTransaction.serializedTransaction),
-      };
-      const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(request),
+      console.log(temp_transaction.actions);
+      var need_sig: boolean = false;
+      Object.keys(temp_transaction.actions).forEach(function (key) {
+        if (parseInt(key) >= 0) {
+          if (
+            _.isEqual(
+              temp_transaction.actions[key]["authorization"],
+              authorization
+            )
+          ) {
+            need_sig = true;
+          }
+        }
       });
 
-      if (!response.ok) {
-        const body = await response.json();
-        throw Error(body.reason || "Failed to connect to endpoint");
-      }
+      if (need_sig) {
+        var temp_braodcast = options.broadcast;
+        options.broadcast = false;
 
-      const json = await response.json();
+        completedTransaction = await this.session.transact(
+          temp_transaction,
+          options
+        );
 
-      completedTransaction.signatures.push(json.sig[0]);
-      console.log("Pushing completed_transaction");
+        const request = {
+          transaction: Array.from(completedTransaction.serializedTransaction),
+        };
+        const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(request),
+        });
 
-      var data = {
-        signatures: completedTransaction.signatures,
-        compression: 0,
-        serializedContextFreeData: undefined,
-        serializedTransaction: completedTransaction.serializedTransaction,
-      };
+        if (!response.ok) {
+          const body = await response.json();
+          throw Error(body.reason || "Failed to connect to endpoint");
+        }
 
-      options.broadcast = temp_braodcast;
-      var completed_transaction = completedTransaction;
-      if (temp_braodcast) {
-        completed_transaction = await api.rpc.send_transaction(data);
+        const json = await response.json();
+
+        completedTransaction.signatures.push(json.sig[0]);
+        console.log("Pushing completed_transaction");
+
+        var data = {
+          signatures: completedTransaction.signatures,
+          compression: 0,
+          serializedContextFreeData: undefined,
+          serializedTransaction: completedTransaction.serializedTransaction,
+        };
+
+        options.broadcast = temp_braodcast;
+        var completed_transaction = completedTransaction;
+        if (temp_braodcast) {
+          completed_transaction = await api.rpc.send_transaction(data);
+        }
       }
 
       const wasBroadcast = options.broadcast !== false;
