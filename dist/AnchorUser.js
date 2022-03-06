@@ -112,7 +112,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     const tx = Object.assign(Object.assign({}, transaction), info.getTransactionHeader(options.expireSeconds));
                     temp_transaction = tx;
                 }
-                console.log(temp_transaction.actions);
+                console.log("Transaction: ", temp_transaction.actions);
                 var need_sig = false;
                 Object.keys(temp_transaction.actions).forEach(function (key) {
                     if (parseInt(key) >= 0) {
@@ -121,6 +121,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                         }
                     }
                 });
+                console.log("need_sig: ", need_sig);
                 if (need_sig) {
                     var temp_braodcast = options.broadcast;
                     options.broadcast = false;
@@ -136,11 +137,13 @@ class AnchorUser extends universal_authenticator_library_1.User {
                         },
                         body: JSON.stringify(request),
                     });
+                    console.log("Response: ", response);
                     if (!response.ok) {
                         const body = yield response.json();
                         throw Error(body.reason || "Failed to connect to endpoint");
                     }
                     const json = yield response.json();
+                    console.log("Response JSON: ", json);
                     completedTransaction.signatures.push(json.sig[0]);
                     console.log("Pushing completed_transaction");
                     var data = {
@@ -155,6 +158,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                         completed_transaction = yield api.rpc.send_transaction(data);
                     }
                 }
+                console.log("Done with changed code.");
                 const wasBroadcast = options.broadcast !== false;
                 const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));
                 return this.returnEosjsTransaction(wasBroadcast, Object.assign(Object.assign({}, completed_transaction), { transaction_id: completed_transaction.payload.tx, serializedTransaction: serializedTransaction.packed_trx.array, signatures: this.objectify(completed_transaction.signatures) }));
