@@ -44,7 +44,7 @@ class CosignAuthorityProvider {
 }
 
 const authorization: Array<Object> = [
-  { actor: "limitlesswx", permission: "cosign" },
+  { actor: "limitlesswax", permission: "cosign" },
 ];
 
 //@ts-ignore
@@ -54,13 +54,6 @@ const api = new Api({
   textDecoder: new TextDecoder(),
   textEncoder: new TextEncoder(),
 });
-// { rpc: JsonRpc;
-//   authorityProvider?: AuthorityProvider | undefined;
-//   abiProvider?: AbiProvider | undefined;
-//   signatureProvider: SignatureProvider;
-//   chainId?: string | undefined;
-//   textEncoder?: TextEncoder | undefined;
-//   textDecoder?: TextDecoder | undefined; }
 
 export class AnchorUser extends User {
   public client: APIClient;

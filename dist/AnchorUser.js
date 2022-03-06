@@ -66,7 +66,7 @@ class CosignAuthorityProvider {
     }
 }
 const authorization = [
-    { actor: "limitlesswx", permission: "cosign" },
+    { actor: "limitlesswax", permission: "cosign" },
 ];
 //@ts-ignore
 const api = new eosjs_1.Api({
@@ -75,13 +75,6 @@ const api = new eosjs_1.Api({
     textDecoder: new TextDecoder(),
     textEncoder: new TextEncoder(),
 });
-// { rpc: JsonRpc;
-//   authorityProvider?: AuthorityProvider | undefined;
-//   abiProvider?: AbiProvider | undefined;
-//   signatureProvider: SignatureProvider;
-//   chainId?: string | undefined;
-//   textEncoder?: TextEncoder | undefined;
-//   textDecoder?: TextDecoder | undefined; }
 class AnchorUser extends universal_authenticator_library_1.User {
     constructor(rpc, client, identity) {
         super();
