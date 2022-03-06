@@ -117,12 +117,14 @@ export class AnchorUser extends User {
       var need_sig: boolean = false;
       Object.keys(temp_transaction.actions).forEach(function (key) {
         if (parseInt(key) >= 0) {
+          console.log("TEST 1: ", key);
           if (
             _.isEqual(
               temp_transaction.actions[key]["authorization"],
               authorization
             )
           ) {
+            console.log("TEST 2: ", temp_transaction.actions[key]);
             need_sig = true;
           }
         }
