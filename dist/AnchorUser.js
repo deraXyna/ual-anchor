@@ -8,11 +8,57 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnchorUser = void 0;
 const universal_authenticator_library_1 = require("universal-authenticator-library");
 const eosio_1 = require("@greymass/eosio");
+const eosjs_1 = require("eosjs");
 const UALAnchorError_1 = require("./UALAnchorError");
+const eosjs_numeric_1 = require("eosjs/dist/eosjs-numeric");
+// import { TextDecoder, TextEncoder } from "util";
+const httpEndpoint = "https://wax.greymass.com";
+const node_fetch_1 = __importDefault(require("node-fetch")); //node only
+const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch: node_fetch_1.default });
+class CosignAuthorityProvider {
+    getRequiredKeys(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { transaction } = args;
+            // Iterate over the actions and authorizations
+            transaction.actions.forEach((action, ti) => {
+                action.authorization.forEach((auth, ai) => {
+                    // If the authorization matches the expected cosigner
+                    // then remove it from the transaction while checking
+                    // for what public keys are required
+                    if (auth.actor === "limitlesswax" && auth.permission === "cosign") {
+                        //@ts-ignore
+                        delete transaction.actions[ti].authorization.splice(ai, 1);
+                    }
+                });
+            });
+            return eosjs_numeric_1.convertLegacyPublicKeys((yield rpc.fetch("/v1/chain/get_required_keys", {
+                transaction,
+                available_keys: args.availableKeys,
+            })).required_keys);
+        });
+    }
+}
+//@ts-ignore
+const api = new eosjs_1.Api({
+    rpc: rpc,
+    authorityProvider: new CosignAuthorityProvider(),
+    textDecoder: new TextDecoder(),
+    textEncoder: new TextEncoder(),
+});
+// { rpc: JsonRpc;
+//   authorityProvider?: AuthorityProvider | undefined;
+//   abiProvider?: AbiProvider | undefined;
+//   signatureProvider: SignatureProvider;
+//   chainId?: string | undefined;
+//   textEncoder?: TextEncoder | undefined;
+//   textDecoder?: TextDecoder | undefined; }
 class AnchorUser extends universal_authenticator_library_1.User {
     constructor(rpc, client, identity) {
         super();
@@ -44,18 +90,47 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 let completedTransaction;
                 // If this is not a transaction and expireSeconds is passed, form a transaction
                 //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
-                console.log("Check OPTIONS: ", options);
+                var temp_transaction = transaction;
                 if (options.expireSeconds && !transaction.expiration) {
                     const info = yield this.client.v1.chain.get_info();
                     const tx = Object.assign(Object.assign({}, transaction), info.getTransactionHeader(options.expireSeconds));
-                    completedTransaction = yield this.session.transact(tx, options);
+                    temp_transaction = tx;
                 }
-                else {
-                    completedTransaction = yield this.session.transact(transaction, options);
+                var temp_braodcast = options.broadcast;
+                options.broadcast = false;
+                completedTransaction = yield this.session.transact(temp_transaction, options);
+                const request = {
+                    transaction: Array.from(completedTransaction.serializedTransaction),
+                };
+                const response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(request),
+                });
+                if (!response.ok) {
+                    const body = yield response.json();
+                    throw Error(body.reason || "Failed to connect to endpoint");
+                }
+                const json = yield response.json();
+                completedTransaction.signatures.push(json.sig[0]);
+                console.log("Pushing completed_transaction");
+                var data = {
+                    signatures: completedTransaction.signatures,
+                    compression: 0,
+                    serializedContextFreeData: undefined,
+                    serializedTransaction: completedTransaction.serializedTransaction,
+                };
+                options.broadcast = temp_braodcast;
+                var completed_transaction = completedTransaction;
+                if (temp_braodcast) {
+                    completed_transaction = yield api.rpc.send_transaction(data);
                 }
                 const wasBroadcast = options.broadcast !== false;
-                const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction));
-                return this.returnEosjsTransaction(wasBroadcast, Object.assign(Object.assign({}, completedTransaction), { transaction_id: completedTransaction.payload.tx, serializedTransaction: serializedTransaction.packed_trx.array, signatures: this.objectify(completedTransaction.signatures) }));
+                const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));
+                return this.returnEosjsTransaction(wasBroadcast, Object.assign(Object.assign({}, completed_transaction), { transaction_id: completed_transaction.payload.tx, serializedTransaction: serializedTransaction.packed_trx.array, signatures: this.objectify(completed_transaction.signatures) }));
             }
             catch (e) {
                 const message = "Unable to sign transaction";
