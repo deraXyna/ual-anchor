@@ -55,6 +55,12 @@ const api = new Api({
   textEncoder: new TextEncoder(),
 });
 
+type ApiValue = {
+  isOk?: boolean;
+  signature?: string;
+  message?: string;
+};
+
 export class AnchorUser extends User {
   public client: APIClient;
   public rpc: JsonRpc;
@@ -153,13 +159,21 @@ export class AnchorUser extends User {
         });
         console.log("Response: ", response);
         if (!response.ok) {
+          //@ts-ignore
           const body = await response.json();
-          throw Error(body.reason || "Failed to connect to endpoint");
+          throw new UALAnchorError(
+            "Failed to connect to endpoint",
+            UALErrorType.Signing,
+            null
+          );
+        }
+        //@ts-ignore
+        const json: ApiValue = await response.json();
+        console.log("Response JSON: ", json);
+        if (json.signature) {
+          completedTransaction.signatures.push(json.signature[0]);
         }
 
-        const json = await response.json();
-        console.log("Response JSON: ", json);
-        completedTransaction.signatures.push(json.sig[0]);
         console.log("Pushing completed_transaction");
 
         var data = {

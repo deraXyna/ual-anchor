@@ -128,12 +128,16 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     });
                     console.log("Response: ", response);
                     if (!response.ok) {
+                        //@ts-ignore
                         const body = yield response.json();
-                        throw Error(body.reason || "Failed to connect to endpoint");
+                        throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
                     }
+                    //@ts-ignore
                     const json = yield response.json();
                     console.log("Response JSON: ", json);
-                    completedTransaction.signatures.push(json.sig[0]);
+                    if (json.signature) {
+                        completedTransaction.signatures.push(json.signature[0]);
+                    }
                     console.log("Pushing completed_transaction");
                     var data = {
                         signatures: completedTransaction.signatures,
