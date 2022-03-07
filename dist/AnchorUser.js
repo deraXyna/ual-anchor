@@ -82,7 +82,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
     }
     signTransaction(transaction, options) {
         return __awaiter(this, void 0, void 0, function* () {
-            let completedTransaction;
+            var completedTransaction;
             // If this is not a transaction and expireSeconds is passed, form a transaction
             //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
             var temp_transaction = transaction;
@@ -130,8 +130,10 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                 }
                 console.log("Didn't broadcast.");
-                const serialized_transaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));
-                console.log("serializedTransaction: ", serialized_transaction);
+                // const serialized_transaction = PackedTransaction.fromSigned(
+                //   SignedTransaction.from(completed_transaction.transaction)
+                // );
+                console.log("serializedTransaction: ", completed_transaction);
                 const request = {
                     transaction: Array.from(completed_transaction.transaction),
                 };

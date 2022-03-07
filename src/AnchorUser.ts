@@ -103,7 +103,7 @@ export class AnchorUser extends User {
     transaction,
     options
   ): Promise<SignTransactionResponse> {
-    let completedTransaction;
+    var completedTransaction;
     // If this is not a transaction and expireSeconds is passed, form a transaction
     //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
 
@@ -157,10 +157,10 @@ export class AnchorUser extends User {
         throw new UALAnchorError(message, type, cause);
       }
       console.log("Didn't broadcast.");
-      const serialized_transaction = PackedTransaction.fromSigned(
-        SignedTransaction.from(completed_transaction.transaction)
-      );
-      console.log("serializedTransaction: ", serialized_transaction);
+      // const serialized_transaction = PackedTransaction.fromSigned(
+      //   SignedTransaction.from(completed_transaction.transaction)
+      // );
+      console.log("serializedTransaction: ", completed_transaction);
       const request = {
         transaction: Array.from(completed_transaction.transaction),
       };
