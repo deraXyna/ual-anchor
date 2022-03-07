@@ -109,7 +109,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 //   }
                 // });
                 console.log("need_sig: ", need_sig);
-                if (need_sig) {
+                if (need_sig === true) {
                     console.log("Getting a sig");
                     var temp_braodcast = options.broadcast;
                     options.broadcast = false;
