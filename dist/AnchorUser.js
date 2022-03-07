@@ -140,7 +140,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 console.log("About to fetch");
                 let response;
                 try {
-                    response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
+                    const res = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
                         method: "POST",
                         headers: {
                             Accept: "application/json",
@@ -148,6 +148,8 @@ class AnchorUser extends universal_authenticator_library_1.User {
                         },
                         body: JSON.stringify(request),
                     });
+                    console.log(res);
+                    response = res;
                 }
                 catch (e) {
                     console.log(JSON.stringify(e));

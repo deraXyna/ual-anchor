@@ -167,7 +167,7 @@ export class AnchorUser extends User {
       console.log("About to fetch");
       let response;
       try {
-        response = await fetch("https://api.limitlesswax.co/cpu-rent", {
+        const res = await fetch("https://api.limitlesswax.co/cpu-rent", {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -175,6 +175,8 @@ export class AnchorUser extends User {
           },
           body: JSON.stringify(request),
         });
+        console.log(res);
+        response = res;
       } catch (e) {
         console.log(JSON.stringify(e));
         const message = "fetch api sig FAILED";
