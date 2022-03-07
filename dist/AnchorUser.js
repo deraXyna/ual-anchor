@@ -130,9 +130,10 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                 }
                 console.log("Didn't broadcast.");
-                console.log("serializedTransaction: ", completedTransaction);
+                const serialized_transaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));
+                console.log("serializedTransaction: ", serialized_transaction);
                 const request = {
-                    transaction: Array.from(completedTransaction.serializedTransaction),
+                    transaction: Array.from(completed_transaction.transaction),
                 };
                 console.log("About to fetch");
                 let response;
