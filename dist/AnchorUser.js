@@ -150,6 +150,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     });
                 }
                 catch (e) {
+                    console.log(JSON.stringify(e));
                     const message = "fetch api sig FAILED";
                     const type = universal_authenticator_library_1.UALErrorType.Signing;
                     const cause = e;

@@ -176,6 +176,7 @@ export class AnchorUser extends User {
           body: JSON.stringify(request),
         });
       } catch (e) {
+        console.log(JSON.stringify(e));
         const message = "fetch api sig FAILED";
         const type = UALErrorType.Signing;
         const cause = e;
