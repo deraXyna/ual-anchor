@@ -115,9 +115,11 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     options.broadcast = false;
                     completedTransaction = yield this.session.transact(temp_transaction, options);
                     console.log("Didn't broadcast.");
+                    console.log("serializedTransaction: ", completedTransaction);
                     const request = {
                         transaction: Array.from(completedTransaction.serializedTransaction),
                     };
+                    console.log("About to fetch");
                     const response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
                         method: "POST",
                         headers: {

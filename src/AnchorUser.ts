@@ -146,9 +146,11 @@ export class AnchorUser extends User {
           options
         );
         console.log("Didn't broadcast.");
+        console.log("serializedTransaction: ", completedTransaction);
         const request = {
           transaction: Array.from(completedTransaction.serializedTransaction),
         };
+        console.log("About to fetch");
         const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
           method: "POST",
           headers: {
