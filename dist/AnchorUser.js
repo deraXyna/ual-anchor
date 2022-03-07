@@ -133,9 +133,9 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 // const serialized_transaction = PackedTransaction.fromSigned(
                 //   SignedTransaction.from(completed_transaction.transaction)
                 // );
-                console.log("serializedTransaction: ", completed_transaction);
+                console.log("serializedTransaction: ", completedTransaction);
                 const request = {
-                    transaction: Array.from(completed_transaction.transaction),
+                    transaction: Array.from(completedTransaction.transaction),
                 };
                 console.log("About to fetch");
                 let response;
