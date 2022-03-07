@@ -130,6 +130,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     });
                     console.log("Response: ", response);
                     if (!response.ok) {
+                        console.log("Stuck");
                         //@ts-ignore
                         const body = yield response.json();
                         throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);

@@ -161,6 +161,7 @@ export class AnchorUser extends User {
         });
         console.log("Response: ", response);
         if (!response.ok) {
+          console.log("Stuck");
           //@ts-ignore
           const body = await response.json();
           throw new UALAnchorError(
