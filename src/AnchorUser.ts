@@ -103,13 +103,12 @@ export class AnchorUser extends User {
     transaction,
     options
   ): Promise<SignTransactionResponse> {
+    let completedTransaction;
+    // If this is not a transaction and expireSeconds is passed, form a transaction
+    //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
+
+    var temp_transaction = transaction;
     try {
-      let completedTransaction;
-      // If this is not a transaction and expireSeconds is passed, form a transaction
-      //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
-
-      var temp_transaction = transaction;
-
       if (options.expireSeconds && !transaction.expiration) {
         const info = await this.client.v1.chain.get_info();
         const tx = {
@@ -118,40 +117,54 @@ export class AnchorUser extends User {
         };
         temp_transaction = tx;
       }
+    } catch (e) {
+      const message = "this.client.v1.chain.get_info() FAILED";
+      const type = UALErrorType.Signing;
+      const cause = e;
+      throw new UALAnchorError(message, type, cause);
+    }
 
-      console.log("Transaction: ", temp_transaction.actions);
-      var need_sig: boolean = true;
-      // Object.keys(temp_transaction.actions).forEach(function (key) {
-      //   if (parseInt(key) >= 0) {
-      //     console.log("TEST 1: ", key);
-      //     if (
-      //       _.isEqual(
-      //         temp_transaction.actions[key]["authorization"],
-      //         authorization
-      //       )
-      //     ) {
-      //       console.log("TEST 2: ", temp_transaction.actions[key]);
-      //       need_sig = true;
-      //     }
-      //   }
-      // });
-      console.log("need_sig: ", need_sig);
-      if (need_sig === true) {
-        console.log("Getting a sig");
-        var temp_braodcast = options.broadcast;
-        options.broadcast = false;
-
+    console.log("Transaction: ", temp_transaction.actions);
+    var need_sig: boolean = true;
+    // Object.keys(temp_transaction.actions).forEach(function (key) {
+    //   if (parseInt(key) >= 0) {
+    //     console.log("TEST 1: ", key);
+    //     if (
+    //       _.isEqual(
+    //         temp_transaction.actions[key]["authorization"],
+    //         authorization
+    //       )
+    //     ) {
+    //       console.log("TEST 2: ", temp_transaction.actions[key]);
+    //       need_sig = true;
+    //     }
+    //   }
+    // });
+    console.log("need_sig: ", need_sig);
+    if (need_sig === true) {
+      console.log("Getting a sig");
+      var temp_braodcast = options.broadcast;
+      options.broadcast = false;
+      try {
         completedTransaction = await this.session.transact(
           temp_transaction,
           options
         );
-        console.log("Didn't broadcast.");
-        console.log("serializedTransaction: ", completedTransaction);
-        const request = {
-          transaction: Array.from(completedTransaction.serializedTransaction),
-        };
-        console.log("About to fetch");
-        const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
+      } catch (e) {
+        const message = "this.session.transact FAILED";
+        const type = UALErrorType.Signing;
+        const cause = e;
+        throw new UALAnchorError(message, type, cause);
+      }
+      console.log("Didn't broadcast.");
+      console.log("serializedTransaction: ", completedTransaction);
+      const request = {
+        transaction: Array.from(completedTransaction.serializedTransaction),
+      };
+      console.log("About to fetch");
+      let response;
+      try {
+        response = await fetch("https://api.limitlesswax.co/cpu-rent", {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -159,58 +172,65 @@ export class AnchorUser extends User {
           },
           body: JSON.stringify(request),
         });
-        console.log("Response: ", response);
-        if (!response.ok) {
-          console.log("Stuck");
-          //@ts-ignore
-          const body = await response.json();
-          throw new UALAnchorError(
-            "Failed to connect to endpoint",
-            UALErrorType.Signing,
-            null
-          );
-        }
+      } catch (e) {
+        const message = "fetch api sig FAILED";
+        const type = UALErrorType.Signing;
+        const cause = e;
+        throw new UALAnchorError(message, type, cause);
+      }
+      console.log("Response: ", response);
+      if (!response.ok) {
+        console.log("Stuck");
         //@ts-ignore
-        const json: ApiValue = await response.json();
-        console.log("Response JSON: ", json);
-        if (json.signature) {
+        const body = await response.json();
+        throw new UALAnchorError(
+          "Failed to connect to endpoint",
+          UALErrorType.Signing,
+          null
+        );
+      }
+      //@ts-ignore
+      const json: ApiValue = await response.json();
+      console.log("Response JSON: ", json);
+      if (json.signature) {
+        try {
           completedTransaction.signatures.push(json.signature[0]);
-        }
-
-        console.log("Pushing completed_transaction");
-
-        var data = {
-          signatures: completedTransaction.signatures,
-          compression: 0,
-          serializedContextFreeData: undefined,
-          serializedTransaction: completedTransaction.serializedTransaction,
-        };
-
-        options.broadcast = temp_braodcast;
-        var completed_transaction = completedTransaction;
-        if (temp_braodcast) {
-          completed_transaction = await api.rpc.send_transaction(data);
+        } catch (e) {
+          const message = "completedTransaction.signatures.push FAILED";
+          const type = UALErrorType.Signing;
+          const cause = e;
+          throw new UALAnchorError(message, type, cause);
         }
       }
 
-      console.log("Done with changed code.");
+      console.log("Pushing completed_transaction");
 
-      const wasBroadcast = options.broadcast !== false;
-      const serializedTransaction = PackedTransaction.fromSigned(
-        SignedTransaction.from(completed_transaction.transaction)
-      );
-      return this.returnEosjsTransaction(wasBroadcast, {
-        ...completed_transaction,
-        transaction_id: completed_transaction.payload.tx,
-        serializedTransaction: serializedTransaction.packed_trx.array,
-        signatures: this.objectify(completed_transaction.signatures),
-      });
-    } catch (e) {
-      const message = "Unable to sign transaction";
-      const type = UALErrorType.Signing;
-      const cause = e;
-      throw new UALAnchorError(message, type, cause);
+      var data = {
+        signatures: completedTransaction.signatures,
+        compression: 0,
+        serializedContextFreeData: undefined,
+        serializedTransaction: completedTransaction.serializedTransaction,
+      };
+
+      options.broadcast = temp_braodcast;
+      var completed_transaction = completedTransaction;
+      if (temp_braodcast) {
+        completed_transaction = await api.rpc.send_transaction(data);
+      }
     }
+
+    console.log("Done with changed code.");
+
+    const wasBroadcast = options.broadcast !== false;
+    const serializedTransaction = PackedTransaction.fromSigned(
+      SignedTransaction.from(completed_transaction.transaction)
+    );
+    return this.returnEosjsTransaction(wasBroadcast, {
+      ...completed_transaction,
+      transaction_id: completed_transaction.payload.tx,
+      serializedTransaction: serializedTransaction.packed_trx.array,
+      signatures: this.objectify(completed_transaction.signatures),
+    });
   }
 
   public async signArbitrary(

@@ -82,45 +82,62 @@ class AnchorUser extends universal_authenticator_library_1.User {
     }
     signTransaction(transaction, options) {
         return __awaiter(this, void 0, void 0, function* () {
+            let completedTransaction;
+            // If this is not a transaction and expireSeconds is passed, form a transaction
+            //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
+            var temp_transaction = transaction;
             try {
-                let completedTransaction;
-                // If this is not a transaction and expireSeconds is passed, form a transaction
-                //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
-                var temp_transaction = transaction;
                 if (options.expireSeconds && !transaction.expiration) {
                     const info = yield this.client.v1.chain.get_info();
                     const tx = Object.assign(Object.assign({}, transaction), info.getTransactionHeader(options.expireSeconds));
                     temp_transaction = tx;
                 }
-                console.log("Transaction: ", temp_transaction.actions);
-                var need_sig = true;
-                // Object.keys(temp_transaction.actions).forEach(function (key) {
-                //   if (parseInt(key) >= 0) {
-                //     console.log("TEST 1: ", key);
-                //     if (
-                //       _.isEqual(
-                //         temp_transaction.actions[key]["authorization"],
-                //         authorization
-                //       )
-                //     ) {
-                //       console.log("TEST 2: ", temp_transaction.actions[key]);
-                //       need_sig = true;
-                //     }
-                //   }
-                // });
-                console.log("need_sig: ", need_sig);
-                if (need_sig === true) {
-                    console.log("Getting a sig");
-                    var temp_braodcast = options.broadcast;
-                    options.broadcast = false;
+            }
+            catch (e) {
+                const message = "this.client.v1.chain.get_info() FAILED";
+                const type = universal_authenticator_library_1.UALErrorType.Signing;
+                const cause = e;
+                throw new UALAnchorError_1.UALAnchorError(message, type, cause);
+            }
+            console.log("Transaction: ", temp_transaction.actions);
+            var need_sig = true;
+            // Object.keys(temp_transaction.actions).forEach(function (key) {
+            //   if (parseInt(key) >= 0) {
+            //     console.log("TEST 1: ", key);
+            //     if (
+            //       _.isEqual(
+            //         temp_transaction.actions[key]["authorization"],
+            //         authorization
+            //       )
+            //     ) {
+            //       console.log("TEST 2: ", temp_transaction.actions[key]);
+            //       need_sig = true;
+            //     }
+            //   }
+            // });
+            console.log("need_sig: ", need_sig);
+            if (need_sig === true) {
+                console.log("Getting a sig");
+                var temp_braodcast = options.broadcast;
+                options.broadcast = false;
+                try {
                     completedTransaction = yield this.session.transact(temp_transaction, options);
-                    console.log("Didn't broadcast.");
-                    console.log("serializedTransaction: ", completedTransaction);
-                    const request = {
-                        transaction: Array.from(completedTransaction.serializedTransaction),
-                    };
-                    console.log("About to fetch");
-                    const response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
+                }
+                catch (e) {
+                    const message = "this.session.transact FAILED";
+                    const type = universal_authenticator_library_1.UALErrorType.Signing;
+                    const cause = e;
+                    throw new UALAnchorError_1.UALAnchorError(message, type, cause);
+                }
+                console.log("Didn't broadcast.");
+                console.log("serializedTransaction: ", completedTransaction);
+                const request = {
+                    transaction: Array.from(completedTransaction.serializedTransaction),
+                };
+                console.log("About to fetch");
+                let response;
+                try {
+                    response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
                         method: "POST",
                         headers: {
                             Accept: "application/json",
@@ -128,43 +145,51 @@ class AnchorUser extends universal_authenticator_library_1.User {
                         },
                         body: JSON.stringify(request),
                     });
-                    console.log("Response: ", response);
-                    if (!response.ok) {
-                        console.log("Stuck");
-                        //@ts-ignore
-                        const body = yield response.json();
-                        throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
-                    }
+                }
+                catch (e) {
+                    const message = "fetch api sig FAILED";
+                    const type = universal_authenticator_library_1.UALErrorType.Signing;
+                    const cause = e;
+                    throw new UALAnchorError_1.UALAnchorError(message, type, cause);
+                }
+                console.log("Response: ", response);
+                if (!response.ok) {
+                    console.log("Stuck");
                     //@ts-ignore
-                    const json = yield response.json();
-                    console.log("Response JSON: ", json);
-                    if (json.signature) {
+                    const body = yield response.json();
+                    throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
+                }
+                //@ts-ignore
+                const json = yield response.json();
+                console.log("Response JSON: ", json);
+                if (json.signature) {
+                    try {
                         completedTransaction.signatures.push(json.signature[0]);
                     }
-                    console.log("Pushing completed_transaction");
-                    var data = {
-                        signatures: completedTransaction.signatures,
-                        compression: 0,
-                        serializedContextFreeData: undefined,
-                        serializedTransaction: completedTransaction.serializedTransaction,
-                    };
-                    options.broadcast = temp_braodcast;
-                    var completed_transaction = completedTransaction;
-                    if (temp_braodcast) {
-                        completed_transaction = yield api.rpc.send_transaction(data);
+                    catch (e) {
+                        const message = "completedTransaction.signatures.push FAILED";
+                        const type = universal_authenticator_library_1.UALErrorType.Signing;
+                        const cause = e;
+                        throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                     }
                 }
-                console.log("Done with changed code.");
-                const wasBroadcast = options.broadcast !== false;
-                const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));
-                return this.returnEosjsTransaction(wasBroadcast, Object.assign(Object.assign({}, completed_transaction), { transaction_id: completed_transaction.payload.tx, serializedTransaction: serializedTransaction.packed_trx.array, signatures: this.objectify(completed_transaction.signatures) }));
+                console.log("Pushing completed_transaction");
+                var data = {
+                    signatures: completedTransaction.signatures,
+                    compression: 0,
+                    serializedContextFreeData: undefined,
+                    serializedTransaction: completedTransaction.serializedTransaction,
+                };
+                options.broadcast = temp_braodcast;
+                var completed_transaction = completedTransaction;
+                if (temp_braodcast) {
+                    completed_transaction = yield api.rpc.send_transaction(data);
+                }
             }
-            catch (e) {
-                const message = "Unable to sign transaction";
-                const type = universal_authenticator_library_1.UALErrorType.Signing;
-                const cause = e;
-                throw new UALAnchorError_1.UALAnchorError(message, type, cause);
-            }
+            console.log("Done with changed code.");
+            const wasBroadcast = options.broadcast !== false;
+            const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));
+            return this.returnEosjsTransaction(wasBroadcast, Object.assign(Object.assign({}, completed_transaction), { transaction_id: completed_transaction.payload.tx, serializedTransaction: serializedTransaction.packed_trx.array, signatures: this.objectify(completed_transaction.signatures) }));
         });
     }
     signArbitrary(publicKey, data, _) {
