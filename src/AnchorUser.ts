@@ -43,9 +43,9 @@ class CosignAuthorityProvider {
   }
 }
 
-const authorization: Array<Object> = [
-  { actor: "limitlesswax", permission: "cosign" },
-];
+// const authorization: Array<Object> = [
+//   { actor: "limitlesswax", permission: "cosign" },
+// ];
 
 //@ts-ignore
 const api = new Api({
@@ -114,23 +114,24 @@ export class AnchorUser extends User {
       }
 
       console.log("Transaction: ", temp_transaction.actions);
-      var need_sig: boolean = false;
-      Object.keys(temp_transaction.actions).forEach(function (key) {
-        if (parseInt(key) >= 0) {
-          console.log("TEST 1: ", key);
-          if (
-            _.isEqual(
-              temp_transaction.actions[key]["authorization"],
-              authorization
-            )
-          ) {
-            console.log("TEST 2: ", temp_transaction.actions[key]);
-            need_sig = true;
-          }
-        }
-      });
+      var need_sig: boolean = true;
+      // Object.keys(temp_transaction.actions).forEach(function (key) {
+      //   if (parseInt(key) >= 0) {
+      //     console.log("TEST 1: ", key);
+      //     if (
+      //       _.isEqual(
+      //         temp_transaction.actions[key]["authorization"],
+      //         authorization
+      //       )
+      //     ) {
+      //       console.log("TEST 2: ", temp_transaction.actions[key]);
+      //       need_sig = true;
+      //     }
+      //   }
+      // });
       console.log("need_sig: ", need_sig);
       if (need_sig) {
+        console.log("Getting a sig");
         var temp_braodcast = options.broadcast;
         options.broadcast = false;
 
@@ -138,7 +139,7 @@ export class AnchorUser extends User {
           temp_transaction,
           options
         );
-
+        console.log("Didn't broadcast.");
         const request = {
           transaction: Array.from(completedTransaction.serializedTransaction),
         };
