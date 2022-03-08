@@ -177,9 +177,10 @@ export class AnchorUser extends User {
       //@ts-ignore
       const json = await response.json();
       console.log("Response JSON: ", json);
+      var sigs;
       if (json.signature) {
         try {
-          completedTransaction.signatures.push(json.signature[0]);
+          sigs.push(json.signature[0]);
         } catch (e) {
           const message = "completedTransaction.signatures.push FAILED";
           const type = UALErrorType.Signing;
@@ -190,24 +191,36 @@ export class AnchorUser extends User {
 
       console.log("Pushing completed_transaction");
 
-      var data = {
-        signatures: completedTransaction.signatures,
-        compression: 0,
-        serializedContextFreeData: undefined,
-        serializedTransaction: PackedTransaction.fromSigned(
-          SignedTransaction.from(completedTransaction.transaction)
-        ).packed_trx.array,
-      };
-      console.log("data: ", data);
+      // var data = {
+      //   signatures: completedTransaction.signatures,
+      //   compression: 0,
+      //   serializedContextFreeData: undefined,
+      //   serializedTransaction: PackedTransaction.fromSigned(
+      //     SignedTransaction.from(completedTransaction.transaction)
+      //   ).packed_trx.array,
+      // };
+      // console.log("data: ", data);
       options.broadcast = temp_braodcast;
-      var completed_transaction;
+      // var completed_transaction;
+      const serial = PackedTransaction.fromSigned(
+        SignedTransaction.from(completedTransaction.transaction)
+      ).packed_trx.array;
+
+      //       export interface PushTransactionArgs {
+      //     signatures: string[];
+      //     compression?: number;
+      //     serializedTransaction: Uint8Array;
+      //     serializedContextFreeData?: Uint8Array;
+      // }
+
       if (temp_braodcast) {
-        completed_transaction = await api.rpc.send_transaction(data);
+        this.session.pushSignedTransaction({ sigs, serial, undefined });
+        // completed_transaction = await api.rpc.send_transaction(data);
       }
     }
     console.log("session: ", this.session);
     console.log("completedTransaction: ", completedTransaction);
-    console.log("completed_transaction: ", completed_transaction);
+    // console.log("completed_transaction: ", completed_transaction);
     console.log("Done with changed code.");
 
     const wasBroadcast = options.broadcast !== false;
@@ -218,7 +231,7 @@ export class AnchorUser extends User {
       ...completedTransaction,
       transaction_id: completedTransaction.payload.tx,
       serializedTransaction: serializedTransaction.packed_trx.array,
-      signatures: this.objectify(completed_transaction.signatures),
+      signatures: this.objectify(completedTransaction.signatures),
     });
   }
 
