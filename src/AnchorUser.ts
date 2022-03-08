@@ -169,7 +169,11 @@ export class AnchorUser extends User {
         )
       );
       const request = {
-        transaction: Array.from(completedTransaction.transaction),
+        transaction: Array.from(
+          PackedTransaction.fromSigned(
+            SignedTransaction.from(completedTransaction.transaction)
+          ).packed_trx.array
+        ),
       };
       console.log("About to fetch");
       console.log(request);
