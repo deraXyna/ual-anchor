@@ -105,28 +105,8 @@ export class AnchorUser extends User {
     options
   ): Promise<SignTransactionResponse> {
     var completedTransaction;
-    // If this is not a transaction and expireSeconds is passed, form a transaction
-    //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
-
-    var temp_transaction = transaction;
     console.log(options);
-    // try {
-    // if (options.expireSeconds && !transaction.expiration) {
-    //   const info = await this.client.v1.chain.get_info();
-    //   const tx = {
-    //     ...transaction,
-    //     ...info.getTransactionHeader(options.expireSeconds),
-    //   };
-    // temp_transaction = tx;
-    // }
-    // } catch (e) {
-    //   const message = "this.client.v1.chain.get_info() FAILED";
-    //   const type = UALErrorType.Signing;
-    //   const cause = e;
-    //   throw new UALAnchorError(message, type, cause);
-    // }
-
-    console.log("Transaction: ", temp_transaction.actions);
+    console.log("Transaction: ", transaction.actions);
     var need_sig: boolean = true;
     // Object.keys(temp_transaction.actions).forEach(function (key) {
     //   if (parseInt(key) >= 0) {
@@ -149,7 +129,7 @@ export class AnchorUser extends User {
       options.broadcast = false;
       try {
         completedTransaction = await this.session.transact(
-          temp_transaction,
+          transaction,
           options
         );
       } catch (e) {
@@ -159,16 +139,9 @@ export class AnchorUser extends User {
         throw new UALAnchorError(message, type, cause);
       }
       console.log("Didn't broadcast.");
-      // const serialized_transaction = PackedTransaction.fromSigned(
-      //   SignedTransaction.from(completed_transaction.transaction)
-      // );
+
       console.log("serializedTransaction: ", completedTransaction);
-      console.log(
-        "What is this",
-        PackedTransaction.fromSigned(
-          SignedTransaction.from(completedTransaction.transaction)
-        )
-      );
+
       const request = {
         transaction: Array.from(
           PackedTransaction.fromSigned(
@@ -178,8 +151,7 @@ export class AnchorUser extends User {
       };
       console.log("About to fetch");
       console.log(request);
-      // let response;
-      // try {
+
       const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
         method: "POST",
         headers: {
@@ -188,15 +160,7 @@ export class AnchorUser extends User {
         },
         body: JSON.stringify(request),
       });
-      // console.log(res);
-      // response = res;
-      // } catch (e) {
-      //   console.log(JSON.stringify(e));
-      //   const message = "fetch api sig FAILED";
-      //   const type = UALErrorType.Signing;
-      //   const cause = e;
-      //   throw new UALAnchorError(message, type, cause);
-      // }
+
       console.log("Response: ", response);
       if (!response.ok) {
         console.log("Stuck");
@@ -234,21 +198,22 @@ export class AnchorUser extends User {
       };
       console.log("data: ", data);
       options.broadcast = temp_braodcast;
-      var completed_transaction = completedTransaction;
+      var completed_transaction;
       if (temp_braodcast) {
         completed_transaction = await api.rpc.send_transaction(data);
       }
     }
+    console.log("session: ", this.session);
     console.log("completedTransaction: ", completedTransaction);
     console.log("completed_transaction: ", completed_transaction);
     console.log("Done with changed code.");
 
     const wasBroadcast = options.broadcast !== false;
     const serializedTransaction = PackedTransaction.fromSigned(
-      SignedTransaction.from(completed_transaction.transaction)
+      SignedTransaction.from(completedTransaction.transaction)
     );
     return this.returnEosjsTransaction(wasBroadcast, {
-      ...completed_transaction,
+      ...completedTransaction,
       transaction_id: completed_transaction.payload.tx,
       serializedTransaction: serializedTransaction.packed_trx.array,
       signatures: this.objectify(completed_transaction.signatures),
