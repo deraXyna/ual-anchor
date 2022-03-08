@@ -84,19 +84,22 @@ class AnchorUser extends universal_authenticator_library_1.User {
             // If this is not a transaction and expireSeconds is passed, form a transaction
             //   Note: this needs to be done because the session transact doesn't understand eosjs transact options
             var temp_transaction = transaction;
-            try {
-                if (options.expireSeconds && !transaction.expiration) {
-                    const info = yield this.client.v1.chain.get_info();
-                    const tx = Object.assign(Object.assign({}, transaction), info.getTransactionHeader(options.expireSeconds));
-                    temp_transaction = tx;
-                }
-            }
-            catch (e) {
-                const message = "this.client.v1.chain.get_info() FAILED";
-                const type = universal_authenticator_library_1.UALErrorType.Signing;
-                const cause = e;
-                throw new UALAnchorError_1.UALAnchorError(message, type, cause);
-            }
+            console.log(options);
+            // try {
+            // if (options.expireSeconds && !transaction.expiration) {
+            //   const info = await this.client.v1.chain.get_info();
+            //   const tx = {
+            //     ...transaction,
+            //     ...info.getTransactionHeader(options.expireSeconds),
+            //   };
+            // temp_transaction = tx;
+            // }
+            // } catch (e) {
+            //   const message = "this.client.v1.chain.get_info() FAILED";
+            //   const type = UALErrorType.Signing;
+            //   const cause = e;
+            //   throw new UALAnchorError(message, type, cause);
+            // }
             console.log("Transaction: ", temp_transaction.actions);
             var need_sig = true;
             // Object.keys(temp_transaction.actions).forEach(function (key) {
