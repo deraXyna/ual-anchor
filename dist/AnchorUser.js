@@ -188,12 +188,15 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     serializedContextFreeData: undefined,
                     serializedTransaction: completedTransaction.serializedTransaction,
                 };
+                console.log("data: ", data);
                 options.broadcast = temp_braodcast;
                 var completed_transaction = completedTransaction;
                 if (temp_braodcast) {
                     completed_transaction = yield api.rpc.send_transaction(data);
                 }
             }
+            console.log("completedTransaction: ", completedTransaction);
+            console.log("completed_transaction: ", completed_transaction);
             console.log("Done with changed code.");
             const wasBroadcast = options.broadcast !== false;
             const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completed_transaction.transaction));
