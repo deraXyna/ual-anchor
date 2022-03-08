@@ -181,7 +181,7 @@ export class AnchorUser extends User {
       //@ts-ignore
       const json = await response.json();
       // console.log("Response JSON: ", json);
-      var sigs;
+      var sigs: any = [];
       if (json.signature) {
         // console.log("json.signature: ", json.signature[0]);
         // try {

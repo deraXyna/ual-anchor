@@ -145,7 +145,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 //@ts-ignore
                 const json = yield response.json();
                 // console.log("Response JSON: ", json);
-                var sigs;
+                var sigs = [];
                 if (json.signature) {
                     // console.log("json.signature: ", json.signature[0]);
                     // try {
