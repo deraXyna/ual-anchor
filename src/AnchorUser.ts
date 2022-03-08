@@ -13,7 +13,8 @@ import { UALAnchorError } from "./UALAnchorError";
 import { convertLegacyPublicKeys } from "eosjs/dist/eosjs-numeric";
 // import { TextDecoder, TextEncoder } from "util";
 const httpEndpoint = "https://wax.greymass.com";
-import fetch from "node-fetch"; //node only
+// import fetch from "node-fetch"; //node only
+let fetch = window.fetch.bind(window);
 const rpc = new JsonRpc(httpEndpoint, { fetch });
 import * as _ from "lodash";
 

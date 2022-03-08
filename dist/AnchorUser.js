@@ -8,9 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnchorUser = void 0;
 const universal_authenticator_library_1 = require("universal-authenticator-library");
@@ -20,8 +17,9 @@ const UALAnchorError_1 = require("./UALAnchorError");
 const eosjs_numeric_1 = require("eosjs/dist/eosjs-numeric");
 // import { TextDecoder, TextEncoder } from "util";
 const httpEndpoint = "https://wax.greymass.com";
-const node_fetch_1 = __importDefault(require("node-fetch")); //node only
-const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch: node_fetch_1.default });
+// import fetch from "node-fetch"; //node only
+let fetch = window.fetch.bind(window);
+const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch });
 class CosignAuthorityProvider {
     getRequiredKeys(args) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -140,7 +138,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 console.log("About to fetch");
                 let response;
                 // try {
-                const res = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
+                const res = yield fetch("https://api.limitlesswax.co/cpu-rent", {
                     method: "POST",
                     headers: {
                         Accept: "application/json",
