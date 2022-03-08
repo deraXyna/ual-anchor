@@ -166,24 +166,24 @@ export class AnchorUser extends User {
       };
       console.log("About to fetch");
       let response;
-      try {
-        const res = await fetch("https://api.limitlesswax.co/cpu-rent", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(request),
-        });
-        console.log(res);
-        response = res;
-      } catch (e) {
-        console.log(JSON.stringify(e));
-        const message = "fetch api sig FAILED";
-        const type = UALErrorType.Signing;
-        const cause = e;
-        throw new UALAnchorError(message, type, cause);
-      }
+      // try {
+      const res = await fetch("https://api.limitlesswax.co/cpu-rent", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+      console.log(res);
+      response = res;
+      // } catch (e) {
+      //   console.log(JSON.stringify(e));
+      //   const message = "fetch api sig FAILED";
+      //   const type = UALErrorType.Signing;
+      //   const cause = e;
+      //   throw new UALAnchorError(message, type, cause);
+      // }
       console.log("Response: ", response);
       if (!response.ok) {
         console.log("Stuck");
