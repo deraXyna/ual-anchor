@@ -44,9 +44,9 @@ class CosignAuthorityProvider {
   }
 }
 
-// const authorization: Array<Object> = [
-//   { actor: "limitlesswax", permission: "cosign" },
-// ];
+const authorization: Array<Object> = [
+  { actor: "limitlesswax", permission: "cosign" },
+];
 
 //@ts-ignore
 const api = new Api({
@@ -55,12 +55,6 @@ const api = new Api({
   textDecoder: new TextDecoder(),
   textEncoder: new TextEncoder(),
 });
-
-// type ApiValue = {
-//   isOk?: boolean;
-//   signature?: string;
-//   message?: string;
-// };
 
 export class AnchorUser extends User {
   public client: APIClient;
@@ -107,23 +101,21 @@ export class AnchorUser extends User {
     var completedTransaction;
     options.sign = true;
     console.log("Transaction: ", transaction.actions);
-    var need_sig: boolean = true;
-    // Object.keys(temp_transaction.actions).forEach(function (key) {
-    //   if (parseInt(key) >= 0) {
-    //     console.log("TEST 1: ", key);
-    //     if (
-    //       _.isEqual(
-    //         temp_transaction.actions[key]["authorization"],
-    //         authorization
-    //       )
-    //     ) {
-    //       console.log("TEST 2: ", temp_transaction.actions[key]);
-    //       need_sig = true;
-    //     }
-    //   }
-    // });
+    var need_sig: number = 0;
+
+    Object.keys(transaction.actions).forEach(function (key) {
+      if (parseInt(key) >= 0) {
+        console.log("TEST 1: ", key);
+        if (
+          _.isEqual(transaction.actions[key]["authorization"], authorization)
+        ) {
+          console.log("TEST 2: ", transaction.actions[key]);
+          need_sig = 1;
+        }
+      }
+    });
     console.log("need_sig: ", need_sig);
-    if (need_sig === true) {
+    if (need_sig === 1) {
       var temp_braodcast = options.broadcast;
       options.broadcast = false;
       try {
