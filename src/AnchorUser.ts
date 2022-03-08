@@ -140,9 +140,13 @@ export class AnchorUser extends User {
         const cause = e;
         throw new UALAnchorError(message, type, cause);
       }
-      console.log("Didn't broadcast.");
+      // console.log("Didn't broadcast.");
 
       console.log("serializedTransaction: ", completedTransaction);
+      console.log(
+        "completedTransaction.payload.sig: ",
+        completedTransaction.payload.sig
+      );
 
       const request = {
         transaction: Array.from(
@@ -163,9 +167,9 @@ export class AnchorUser extends User {
         body: JSON.stringify(request),
       });
 
-      console.log("Response: ", response);
+      // console.log("Response: ", response);
       if (!response.ok) {
-        console.log("Stuck");
+        // console.log("Stuck");
         //@ts-ignore
         const body = await response.json();
         throw new UALAnchorError(
@@ -176,10 +180,10 @@ export class AnchorUser extends User {
       }
       //@ts-ignore
       const json = await response.json();
-      console.log("Response JSON: ", json);
+      // console.log("Response JSON: ", json);
       var sigs;
       if (json.signature) {
-        console.log("json.signature: ", json.signature[0]);
+        // console.log("json.signature: ", json.signature[0]);
         try {
           sigs[0] = json.signature[0];
         } catch (e) {

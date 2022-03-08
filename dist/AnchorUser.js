@@ -119,8 +119,9 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     const cause = e;
                     throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                 }
-                console.log("Didn't broadcast.");
+                // console.log("Didn't broadcast.");
                 console.log("serializedTransaction: ", completedTransaction);
+                console.log("completedTransaction.payload.sig: ", completedTransaction.payload.sig);
                 const request = {
                     transaction: Array.from(eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction)).packed_trx.array),
                 };
@@ -134,19 +135,19 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     },
                     body: JSON.stringify(request),
                 });
-                console.log("Response: ", response);
+                // console.log("Response: ", response);
                 if (!response.ok) {
-                    console.log("Stuck");
+                    // console.log("Stuck");
                     //@ts-ignore
                     const body = yield response.json();
                     throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
                 }
                 //@ts-ignore
                 const json = yield response.json();
-                console.log("Response JSON: ", json);
+                // console.log("Response JSON: ", json);
                 var sigs;
                 if (json.signature) {
-                    console.log("json.signature: ", json.signature[0]);
+                    // console.log("json.signature: ", json.signature[0]);
                     try {
                         sigs[0] = json.signature[0];
                     }
