@@ -186,7 +186,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     signatures: completedTransaction.signatures,
                     compression: 0,
                     serializedContextFreeData: undefined,
-                    serializedTransaction: completedTransaction.serializedTransaction,
+                    serializedTransaction: eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction)).packed_trx.array,
                 };
                 console.log("data: ", data);
                 options.broadcast = temp_braodcast;

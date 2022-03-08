@@ -228,7 +228,9 @@ export class AnchorUser extends User {
         signatures: completedTransaction.signatures,
         compression: 0,
         serializedContextFreeData: undefined,
-        serializedTransaction: completedTransaction.serializedTransaction,
+        serializedTransaction: PackedTransaction.fromSigned(
+          SignedTransaction.from(completedTransaction.transaction)
+        ).packed_trx.array,
       };
       console.log("data: ", data);
       options.broadcast = temp_braodcast;
