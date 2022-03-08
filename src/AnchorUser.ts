@@ -179,6 +179,7 @@ export class AnchorUser extends User {
       console.log("Response JSON: ", json);
       var sigs;
       if (json.signature) {
+        console.log("json.signature: ", json.signature);
         try {
           sigs.push(json.signature[0]);
         } catch (e) {
