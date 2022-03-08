@@ -86,9 +86,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
     signTransaction(transaction, options) {
         return __awaiter(this, void 0, void 0, function* () {
             var completedTransaction;
-            console.log(options);
             options.sign = true;
-            console.log(options);
             console.log("Transaction: ", transaction.actions);
             var need_sig = true;
             // Object.keys(temp_transaction.actions).forEach(function (key) {
@@ -107,7 +105,6 @@ class AnchorUser extends universal_authenticator_library_1.User {
             // });
             console.log("need_sig: ", need_sig);
             if (need_sig === true) {
-                console.log("Getting a sig");
                 var temp_braodcast = options.broadcast;
                 options.broadcast = false;
                 try {
@@ -119,9 +116,6 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     const cause = e;
                     throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                 }
-                // console.log("Didn't broadcast.");
-                console.log("serializedTransaction: ", completedTransaction);
-                console.log("completedTransaction.payload.sig: ", completedTransaction.payload.sig);
                 const request = {
                     transaction: Array.from(eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction)).packed_trx.array),
                 };
@@ -135,14 +129,9 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     },
                     body: JSON.stringify(request),
                 });
-                // console.log("Response: ", response);
                 if (!response.ok) {
-                    // console.log("Stuck");
-                    //@ts-ignore
-                    const body = yield response.json();
                     throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
                 }
-                //@ts-ignore
                 const json = yield response.json();
                 // console.log("Response JSON: ", json);
                 var sigs = [];

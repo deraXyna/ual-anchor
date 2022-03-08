@@ -105,9 +105,7 @@ export class AnchorUser extends User {
     options
   ): Promise<SignTransactionResponse> {
     var completedTransaction;
-    console.log(options);
     options.sign = true;
-    console.log(options);
     console.log("Transaction: ", transaction.actions);
     var need_sig: boolean = true;
     // Object.keys(temp_transaction.actions).forEach(function (key) {
@@ -126,7 +124,6 @@ export class AnchorUser extends User {
     // });
     console.log("need_sig: ", need_sig);
     if (need_sig === true) {
-      console.log("Getting a sig");
       var temp_braodcast = options.broadcast;
       options.broadcast = false;
       try {
@@ -140,13 +137,6 @@ export class AnchorUser extends User {
         const cause = e;
         throw new UALAnchorError(message, type, cause);
       }
-      // console.log("Didn't broadcast.");
-
-      console.log("serializedTransaction: ", completedTransaction);
-      console.log(
-        "completedTransaction.payload.sig: ",
-        completedTransaction.payload.sig
-      );
 
       const request = {
         transaction: Array.from(
@@ -167,18 +157,13 @@ export class AnchorUser extends User {
         body: JSON.stringify(request),
       });
 
-      // console.log("Response: ", response);
       if (!response.ok) {
-        // console.log("Stuck");
-        //@ts-ignore
-        const body = await response.json();
         throw new UALAnchorError(
           "Failed to connect to endpoint",
           UALErrorType.Signing,
           null
         );
       }
-      //@ts-ignore
       const json = await response.json();
       // console.log("Response JSON: ", json);
       var sigs: any = [];
