@@ -133,25 +133,25 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
                 }
                 const json = yield response.json();
-                // console.log("Response JSON: ", json);
+                console.log("Response JSON: ", json);
                 var sigs = [];
                 if (json.signature) {
                     sigs.push(json.signature[0]);
                     sigs.push(completedTransaction.payload.sig);
                 }
                 console.log("Pushing completed_transaction");
-                // var data = {
-                //   signatures: completedTransaction.signatures,
-                //   compression: 0,
-                //   serializedContextFreeData: undefined,
-                //   serializedTransaction: PackedTransaction.fromSigned(
-                //     SignedTransaction.from(completedTransaction.transaction)
-                //   ).packed_trx.array,
-                // };
-                // console.log("data: ", data);
+                var data = {
+                    signatures: sigs,
+                    compression: 0,
+                    serializedContextFreeData: undefined,
+                    serializedTransaction: eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction)).packed_trx.array,
+                };
+                console.log("data: ", data);
                 options.broadcast = temp_braodcast;
-                // var completed_transaction;
-                const serial = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction)).packed_trx.array;
+                // var completed_transaction: any;
+                // const serial = PackedTransaction.fromSigned(
+                //   SignedTransaction.from(completedTransaction.transaction)
+                // ).packed_trx.array;
                 //       export interface PushTransactionArgs {
                 //     signatures: string[];
                 //     compression?: number;
@@ -159,20 +159,25 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 //     serializedContextFreeData?: Uint8Array;
                 // }
                 if (temp_braodcast) {
-                    //@ts-ignore
-                    console.log("check sig: ", sigs);
-                    //@ts-ignore
-                    this.session.pushSignedTransaction({
-                        signatures: sigs,
-                        serializedTransaction: serial,
-                        compression: undefined,
-                        serializedContextFreeData: undefined,
-                    });
-                    // completed_transaction = await api.rpc.send_transaction(data);
+                    // this.session.pushSignedTransaction({
+                    //   signatures: sigs,
+                    //   serializedTransaction: serial,
+                    //   compression: undefined,
+                    //   serializedContextFreeData: undefined,
+                    // });
+                    try {
+                        yield api.rpc.send_transaction(data);
+                    }
+                    catch (e) {
+                        const message = "api.rpc.send_transaction FAILED";
+                        const type = universal_authenticator_library_1.UALErrorType.Signing;
+                        const cause = e;
+                        throw new UALAnchorError_1.UALAnchorError(message, type, cause);
+                    }
                 }
             }
-            console.log("session: ", this.session);
-            console.log("completedTransaction: ", completedTransaction);
+            // console.log("session: ", this.session);
+            // console.log("completedTransaction: ", completedTransaction);
             // console.log("completed_transaction: ", completed_transaction);
             console.log("Done with changed code.");
             const wasBroadcast = options.broadcast !== false;

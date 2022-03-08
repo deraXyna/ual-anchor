@@ -165,7 +165,8 @@ export class AnchorUser extends User {
         );
       }
       const json = await response.json();
-      // console.log("Response JSON: ", json);
+      console.log("Response JSON: ", json);
+
       var sigs: any = [];
       if (json.signature) {
         sigs.push(json.signature[0]);
@@ -174,20 +175,20 @@ export class AnchorUser extends User {
 
       console.log("Pushing completed_transaction");
 
-      // var data = {
-      //   signatures: completedTransaction.signatures,
-      //   compression: 0,
-      //   serializedContextFreeData: undefined,
-      //   serializedTransaction: PackedTransaction.fromSigned(
-      //     SignedTransaction.from(completedTransaction.transaction)
-      //   ).packed_trx.array,
-      // };
-      // console.log("data: ", data);
+      var data = {
+        signatures: sigs,
+        compression: 0,
+        serializedContextFreeData: undefined,
+        serializedTransaction: PackedTransaction.fromSigned(
+          SignedTransaction.from(completedTransaction.transaction)
+        ).packed_trx.array,
+      };
+      console.log("data: ", data);
       options.broadcast = temp_braodcast;
-      // var completed_transaction;
-      const serial = PackedTransaction.fromSigned(
-        SignedTransaction.from(completedTransaction.transaction)
-      ).packed_trx.array;
+      // var completed_transaction: any;
+      // const serial = PackedTransaction.fromSigned(
+      //   SignedTransaction.from(completedTransaction.transaction)
+      // ).packed_trx.array;
 
       //       export interface PushTransactionArgs {
       //     signatures: string[];
@@ -197,20 +198,24 @@ export class AnchorUser extends User {
       // }
 
       if (temp_braodcast) {
-        //@ts-ignore
-        console.log("check sig: ", sigs);
-        //@ts-ignore
-        this.session.pushSignedTransaction({
-          signatures: sigs,
-          serializedTransaction: serial,
-          compression: undefined,
-          serializedContextFreeData: undefined,
-        });
-        // completed_transaction = await api.rpc.send_transaction(data);
+        // this.session.pushSignedTransaction({
+        //   signatures: sigs,
+        //   serializedTransaction: serial,
+        //   compression: undefined,
+        //   serializedContextFreeData: undefined,
+        // });
+        try {
+          await api.rpc.send_transaction(data);
+        } catch (e) {
+          const message = "api.rpc.send_transaction FAILED";
+          const type = UALErrorType.Signing;
+          const cause = e;
+          throw new UALAnchorError(message, type, cause);
+        }
       }
     }
-    console.log("session: ", this.session);
-    console.log("completedTransaction: ", completedTransaction);
+    // console.log("session: ", this.session);
+    // console.log("completedTransaction: ", completedTransaction);
     // console.log("completed_transaction: ", completed_transaction);
     console.log("Done with changed code.");
 
