@@ -149,6 +149,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 if (json.signature) {
                     // console.log("json.signature: ", json.signature[0]);
                     try {
+                        //@ts-ignore
                         sigs[0] = json.signature[0];
                     }
                     catch (e) {
@@ -178,6 +179,9 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 //     serializedContextFreeData?: Uint8Array;
                 // }
                 if (temp_braodcast) {
+                    //@ts-ignore
+                    console.log("check sig: ", sigs);
+                    //@ts-ignore
                     this.session.pushSignedTransaction({ sigs, serial, undefined });
                     // completed_transaction = await api.rpc.send_transaction(data);
                 }
