@@ -146,9 +146,9 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 console.log("Response JSON: ", json);
                 var sigs;
                 if (json.signature) {
-                    console.log("json.signature: ", json.signature);
+                    console.log("json.signature: ", json.signature[0]);
                     try {
-                        sigs.push(json.signature[0]);
+                        sigs[0] = json.signature[0];
                     }
                     catch (e) {
                         const message = "completedTransaction.signatures.push FAILED";
