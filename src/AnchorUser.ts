@@ -181,19 +181,19 @@ export class AnchorUser extends User {
       //@ts-ignore
       const json = await response.json();
       // console.log("Response JSON: ", json);
-
-      // if (json.signature) {
-      // console.log("json.signature: ", json.signature[0]);
-      // try {
       var sigs;
-      sigs.push(json.signature[0]);
-      sigs.push(completedTransaction.payload.sig);
-      // } catch (e) {
-      //   const message = "completedTransaction.signatures.push FAILED";
-      //   const type = UALErrorType.Signing;
-      //   const cause = e;
-      //   throw new UALAnchorError(message, type, cause);
-      // }
+      if (json.signature) {
+        // console.log("json.signature: ", json.signature[0]);
+        // try {
+
+        sigs.push(json.signature[0]);
+        sigs.push(completedTransaction.payload.sig);
+        // } catch (e) {
+        //   const message = "completedTransaction.signatures.push FAILED";
+        //   const type = UALErrorType.Signing;
+        //   const cause = e;
+        //   throw new UALAnchorError(message, type, cause);
+      }
       // }
 
       console.log("Pushing completed_transaction");
