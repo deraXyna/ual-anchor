@@ -177,19 +177,18 @@ export class AnchorUser extends User {
       };
       console.log("About to fetch");
       console.log(request);
-      let response;
+      // let response;
       // try {
-      const res = await fetch("https://api.limitlesswax.co/cpu-rent", {
+      const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "content-type": "application/x-www-form-urlencoded",
         },
         body: JSON.stringify(request),
       });
-      console.log(res);
-      response = res;
+      // console.log(res);
+      // response = res;
       // } catch (e) {
       //   console.log(JSON.stringify(e));
       //   const message = "fetch api sig FAILED";
