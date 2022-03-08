@@ -53,6 +53,11 @@ const api = new eosjs_1.Api({
     textDecoder: new TextDecoder(),
     textEncoder: new TextEncoder(),
 });
+// type ApiValue = {
+//   isOk?: boolean;
+//   signature?: string;
+//   message?: string;
+// };
 class AnchorUser extends universal_authenticator_library_1.User {
     constructor(rpc, client, identity) {
         super();
@@ -81,6 +86,8 @@ class AnchorUser extends universal_authenticator_library_1.User {
     signTransaction(transaction, options) {
         return __awaiter(this, void 0, void 0, function* () {
             var completedTransaction;
+            console.log(options);
+            options.sign = true;
             console.log(options);
             console.log("Transaction: ", transaction.actions);
             var need_sig = true;

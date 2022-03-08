@@ -56,11 +56,11 @@ const api = new Api({
   textEncoder: new TextEncoder(),
 });
 
-type ApiValue = {
-  isOk?: boolean;
-  signature?: string;
-  message?: string;
-};
+// type ApiValue = {
+//   isOk?: boolean;
+//   signature?: string;
+//   message?: string;
+// };
 
 export class AnchorUser extends User {
   public client: APIClient;
@@ -105,6 +105,8 @@ export class AnchorUser extends User {
     options
   ): Promise<SignTransactionResponse> {
     var completedTransaction;
+    console.log(options);
+    options.sign = true;
     console.log(options);
     console.log("Transaction: ", transaction.actions);
     var need_sig: boolean = true;
@@ -173,7 +175,7 @@ export class AnchorUser extends User {
         );
       }
       //@ts-ignore
-      const json: ApiValue = await response.json();
+      const json = await response.json();
       console.log("Response JSON: ", json);
       if (json.signature) {
         try {
