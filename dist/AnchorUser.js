@@ -148,25 +148,10 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 };
                 console.log("data: ", data);
                 options.broadcast = temp_braodcast;
-                // var completed_transaction: any;
-                // const serial = PackedTransaction.fromSigned(
-                //   SignedTransaction.from(completedTransaction.transaction)
-                // ).packed_trx.array;
-                //       export interface PushTransactionArgs {
-                //     signatures: string[];
-                //     compression?: number;
-                //     serializedTransaction: Uint8Array;
-                //     serializedContextFreeData?: Uint8Array;
-                // }
                 if (temp_braodcast) {
-                    // this.session.pushSignedTransaction({
-                    //   signatures: sigs,
-                    //   serializedTransaction: serial,
-                    //   compression: undefined,
-                    //   serializedContextFreeData: undefined,
-                    // });
                     try {
-                        yield api.rpc.send_transaction(data);
+                        var completed_transaction = yield api.rpc.send_transaction(data);
+                        console.log("completed: ", completed_transaction);
                     }
                     catch (e) {
                         const message = "api.rpc.send_transaction FAILED";
@@ -177,8 +162,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 }
             }
             // console.log("session: ", this.session);
-            // console.log("completedTransaction: ", completedTransaction);
-            // console.log("completed_transaction: ", completed_transaction);
+            console.log("completedTransaction: ", completedTransaction);
             console.log("Done with changed code.");
             const wasBroadcast = options.broadcast !== false;
             const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction));
