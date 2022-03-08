@@ -152,6 +152,9 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     try {
                         var completed_transaction = yield api.rpc.send_transaction(data);
                         console.log("completed: ", completed_transaction);
+                        completedTransaction.transaction_id =
+                            completed_transaction.transaction_id;
+                        completedTransaction.processed = completed_transaction.processed;
                     }
                     catch (e) {
                         const message = "api.rpc.send_transaction FAILED";
@@ -162,6 +165,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 }
             }
             // console.log("session: ", this.session);
+            completedTransaction.signatures = sigs;
             console.log("completedTransaction: ", completedTransaction);
             console.log("Done with changed code.");
             const wasBroadcast = options.broadcast !== false;
