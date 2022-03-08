@@ -214,7 +214,7 @@ export class AnchorUser extends User {
     );
     return this.returnEosjsTransaction(wasBroadcast, {
       ...completedTransaction,
-      transaction_id: completed_transaction.payload.tx,
+      transaction_id: completedTransaction.payload.tx,
       serializedTransaction: serializedTransaction.packed_trx.array,
       signatures: this.objectify(completed_transaction.signatures),
     });
