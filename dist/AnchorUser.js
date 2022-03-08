@@ -136,6 +136,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     transaction: Array.from(completedTransaction.transaction),
                 };
                 console.log("About to fetch");
+                console.log(request);
                 let response;
                 // try {
                 const res = yield fetch("https://api.limitlesswax.co/cpu-rent", {

@@ -166,6 +166,7 @@ export class AnchorUser extends User {
         transaction: Array.from(completedTransaction.transaction),
       };
       console.log("About to fetch");
+      console.log(request);
       let response;
       // try {
       const res = await fetch("https://api.limitlesswax.co/cpu-rent", {
