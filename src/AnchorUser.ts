@@ -99,7 +99,7 @@ export class AnchorUser extends User {
     options
   ): Promise<SignTransactionResponse> {
     var completedTransaction;
-    options.sign = true;
+
     console.log("Transaction: ", transaction.actions);
     var need_sig: number = 0;
 
@@ -116,6 +116,7 @@ export class AnchorUser extends User {
     });
     console.log("need_sig: ", need_sig);
     if (need_sig === 1) {
+      options.sign = true;
       var temp_braodcast = options.broadcast;
       options.broadcast = false;
       try {
@@ -192,11 +193,24 @@ export class AnchorUser extends User {
           throw new UALAnchorError(message, type, cause);
         }
       }
+      completedTransaction.signatures = sigs;
+      console.log("completedTransaction: ", completedTransaction);
+      console.log("Done with changed code.");
+    } else {
+      if (options.expireSeconds && !transaction.expiration) {
+        const info = await this.client.v1.chain.get_info();
+        const tx = {
+          ...transaction,
+          ...info.getTransactionHeader(options.expireSeconds),
+        };
+        completedTransaction = await this.session.transact(tx, options);
+      } else {
+        completedTransaction = await this.session.transact(
+          transaction,
+          options
+        );
+      }
     }
-    // console.log("session: ", this.session);
-    completedTransaction.signatures = sigs;
-    console.log("completedTransaction: ", completedTransaction);
-    console.log("Done with changed code.");
 
     const wasBroadcast = options.broadcast !== false;
     const serializedTransaction = PackedTransaction.fromSigned(

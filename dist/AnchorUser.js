@@ -101,7 +101,6 @@ class AnchorUser extends universal_authenticator_library_1.User {
     signTransaction(transaction, options) {
         return __awaiter(this, void 0, void 0, function* () {
             var completedTransaction;
-            options.sign = true;
             console.log("Transaction: ", transaction.actions);
             var need_sig = 0;
             Object.keys(transaction.actions).forEach(function (key) {
@@ -115,6 +114,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
             });
             console.log("need_sig: ", need_sig);
             if (need_sig === 1) {
+                options.sign = true;
                 var temp_braodcast = options.broadcast;
                 options.broadcast = false;
                 try {
@@ -173,11 +173,20 @@ class AnchorUser extends universal_authenticator_library_1.User {
                         throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                     }
                 }
+                completedTransaction.signatures = sigs;
+                console.log("completedTransaction: ", completedTransaction);
+                console.log("Done with changed code.");
             }
-            // console.log("session: ", this.session);
-            completedTransaction.signatures = sigs;
-            console.log("completedTransaction: ", completedTransaction);
-            console.log("Done with changed code.");
+            else {
+                if (options.expireSeconds && !transaction.expiration) {
+                    const info = yield this.client.v1.chain.get_info();
+                    const tx = Object.assign(Object.assign({}, transaction), info.getTransactionHeader(options.expireSeconds));
+                    completedTransaction = yield this.session.transact(tx, options);
+                }
+                else {
+                    completedTransaction = yield this.session.transact(transaction, options);
+                }
+            }
             const wasBroadcast = options.broadcast !== false;
             const serializedTransaction = eosio_1.PackedTransaction.fromSigned(eosio_1.SignedTransaction.from(completedTransaction.transaction));
             return this.returnEosjsTransaction(wasBroadcast, Object.assign(Object.assign({}, completedTransaction), { transaction_id: completedTransaction.payload.tx, serializedTransaction: serializedTransaction.packed_trx.array, signatures: this.objectify(completedTransaction.signatures) }));
