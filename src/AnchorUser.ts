@@ -183,18 +183,9 @@ export class AnchorUser extends User {
       // console.log("Response JSON: ", json);
       var sigs: any = [];
       if (json.signature) {
-        // console.log("json.signature: ", json.signature[0]);
-        // try {
-
         sigs.push(json.signature[0]);
         sigs.push(completedTransaction.payload.sig);
-        // } catch (e) {
-        //   const message = "completedTransaction.signatures.push FAILED";
-        //   const type = UALErrorType.Signing;
-        //   const cause = e;
-        //   throw new UALAnchorError(message, type, cause);
       }
-      // }
 
       console.log("Pushing completed_transaction");
 
@@ -224,7 +215,11 @@ export class AnchorUser extends User {
         //@ts-ignore
         console.log("check sig: ", sigs);
         //@ts-ignore
-        this.session.pushSignedTransaction({ sigs, serial, undefined });
+        this.session.pushSignedTransaction({
+          signatures: sigs,
+          serializedTransaction: serial,
+          serializedContextFreeData: undefined,
+        });
         // completed_transaction = await api.rpc.send_transaction(data);
       }
     }
