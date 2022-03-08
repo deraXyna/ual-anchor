@@ -162,6 +162,12 @@ export class AnchorUser extends User {
       //   SignedTransaction.from(completed_transaction.transaction)
       // );
       console.log("serializedTransaction: ", completedTransaction);
+      console.log(
+        "What is this",
+        PackedTransaction.fromSigned(
+          SignedTransaction.from(completedTransaction.transaction)
+        )
+      );
       const request = {
         transaction: Array.from(completedTransaction.transaction),
       };
