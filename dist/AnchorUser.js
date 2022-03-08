@@ -176,6 +176,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     this.session.pushSignedTransaction({
                         signatures: sigs,
                         serializedTransaction: serial,
+                        compression: 0,
                         serializedContextFreeData: undefined,
                     });
                     // completed_transaction = await api.rpc.send_transaction(data);
