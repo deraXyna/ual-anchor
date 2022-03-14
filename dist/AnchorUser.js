@@ -40,7 +40,6 @@ const eosjs_numeric_1 = require("eosjs/dist/eosjs-numeric");
 // import { TextDecoder, TextEncoder } from "util";
 const httpEndpoint = "https://wax.greymass.com";
 const node_fetch_1 = __importDefault(require("node-fetch")); //node only
-let fetchWindow = window.fetch.bind(window);
 // import axios from "axios"
 const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch: node_fetch_1.default });
 const _ = __importStar(require("lodash"));
@@ -138,6 +137,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 // var response = {};
                 var json = { signature: [] };
                 if (typeof window !== "undefined") {
+                    let fetchWindow = window.fetch.bind(window);
                     const response = yield fetchWindow("https://api.limitlesswax.co/cpu-rent", {
                         method: "POST",
                         headers: {

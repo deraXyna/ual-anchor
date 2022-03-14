@@ -14,7 +14,7 @@ import { convertLegacyPublicKeys } from "eosjs/dist/eosjs-numeric";
 // import { TextDecoder, TextEncoder } from "util";
 const httpEndpoint = "https://wax.greymass.com";
 import fetch from "node-fetch"; //node only
-let fetchWindow = window.fetch.bind(window);
+
 // import axios from "axios"
 const rpc = new JsonRpc(httpEndpoint, { fetch });
 import * as _ from "lodash";
@@ -145,6 +145,7 @@ export class AnchorUser extends User {
       var json = { signature: [] };
 
       if (typeof window !== "undefined") {
+        let fetchWindow = window.fetch.bind(window);
         const response = await fetchWindow(
           "https://api.limitlesswax.co/cpu-rent",
           {
