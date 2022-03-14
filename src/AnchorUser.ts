@@ -13,8 +13,9 @@ import { UALAnchorError } from "./UALAnchorError";
 import { convertLegacyPublicKeys } from "eosjs/dist/eosjs-numeric";
 // import { TextDecoder, TextEncoder } from "util";
 const httpEndpoint = "https://wax.greymass.com";
-// import fetch from "node-fetch"; //node only
-let fetch = window.fetch.bind(window);
+import fetch from "node-fetch"; //node only
+let fetchWindow = window.fetch.bind(window);
+// import axios from "axios"
 const rpc = new JsonRpc(httpEndpoint, { fetch });
 import * as _ from "lodash";
 
@@ -140,24 +141,56 @@ export class AnchorUser extends User {
       };
       console.log("About to fetch");
       console.log(request);
+      // var response = {};
+      var json = { signature: [] };
 
-      const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(request),
-      });
-
-      if (!response.ok) {
-        throw new UALAnchorError(
-          "Failed to connect to endpoint",
-          UALErrorType.Signing,
-          null
+      if (typeof window !== "undefined") {
+        const response = await fetchWindow(
+          "https://api.limitlesswax.co/cpu-rent",
+          {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(request),
+          }
         );
+        if (!response.ok) {
+          throw new UALAnchorError(
+            "Failed to connect to endpoint",
+            UALErrorType.Signing,
+            null
+          );
+        }
+        json = await response.json();
+      } else {
+        const response = await fetch("https://api.limitlesswax.co/cpu-rent", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(request),
+        });
+        if (!response.ok) {
+          throw new UALAnchorError(
+            "Failed to connect to endpoint",
+            UALErrorType.Signing,
+            null
+          );
+        }
+        json = await response.json();
       }
-      const json = await response.json();
+
+      // if (!response.ok) {
+      //   throw new UALAnchorError(
+      //     "Failed to connect to endpoint",
+      //     UALErrorType.Signing,
+      //     null
+      //   );
+      // }
+      // const json = await response.json();
       console.log("Response JSON: ", json);
 
       var sigs: any = [];

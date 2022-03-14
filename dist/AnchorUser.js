@@ -27,6 +27,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnchorUser = void 0;
 const universal_authenticator_library_1 = require("universal-authenticator-library");
@@ -36,9 +39,10 @@ const UALAnchorError_1 = require("./UALAnchorError");
 const eosjs_numeric_1 = require("eosjs/dist/eosjs-numeric");
 // import { TextDecoder, TextEncoder } from "util";
 const httpEndpoint = "https://wax.greymass.com";
-// import fetch from "node-fetch"; //node only
-let fetch = window.fetch.bind(window);
-const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch });
+const node_fetch_1 = __importDefault(require("node-fetch")); //node only
+let fetchWindow = window.fetch.bind(window);
+// import axios from "axios"
+const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch: node_fetch_1.default });
 const _ = __importStar(require("lodash"));
 class CosignAuthorityProvider {
     getRequiredKeys(args) {
@@ -131,18 +135,44 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 };
                 console.log("About to fetch");
                 console.log(request);
-                const response = yield fetch("https://api.limitlesswax.co/cpu-rent", {
-                    method: "POST",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(request),
-                });
-                if (!response.ok) {
-                    throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
+                // var response = {};
+                var json = { signature: [] };
+                if (typeof window !== "undefined") {
+                    const response = yield fetchWindow("https://api.limitlesswax.co/cpu-rent", {
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(request),
+                    });
+                    if (!response.ok) {
+                        throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
+                    }
+                    json = yield response.json();
                 }
-                const json = yield response.json();
+                else {
+                    const response = yield node_fetch_1.default("https://api.limitlesswax.co/cpu-rent", {
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(request),
+                    });
+                    if (!response.ok) {
+                        throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
+                    }
+                    json = yield response.json();
+                }
+                // if (!response.ok) {
+                //   throw new UALAnchorError(
+                //     "Failed to connect to endpoint",
+                //     UALErrorType.Signing,
+                //     null
+                //   );
+                // }
+                // const json = await response.json();
                 console.log("Response JSON: ", json);
                 var sigs = [];
                 if (json.signature) {
