@@ -129,6 +129,7 @@ export class AnchorUser extends User {
         const message = "this.session.transact FAILED";
         const type = UALErrorType.Signing;
         const cause = e;
+        //@ts-ignore
         throw new UALAnchorError(message, type, cause);
       }
 
@@ -181,6 +182,7 @@ export class AnchorUser extends User {
             null
           );
         }
+        //@ts-ignore
         json = await response.json();
       }
 
@@ -224,6 +226,7 @@ export class AnchorUser extends User {
           const message = "api.rpc.send_transaction FAILED";
           const type = UALErrorType.Signing;
           const cause = e;
+          //@ts-ignore
           throw new UALAnchorError(message, type, cause);
         }
       }
@@ -297,6 +300,7 @@ export class AnchorUser extends User {
         Please make sure your wallet is running.`;
       const type = UALErrorType.DataRequest;
       const cause = error;
+      //@ts-ignore
       throw new UALAnchorError(message, type, cause);
     }
   }
@@ -315,6 +319,7 @@ export class AnchorUser extends User {
         }).length > 0
       );
     } catch (e) {
+      //@ts-ignore
       if (e.constructor.name === "UALAnchorError") {
         throw e;
       }
@@ -322,6 +327,7 @@ export class AnchorUser extends User {
       const message = `Account validation failed for account ${this.accountName}.`;
       const type = UALErrorType.Validation;
       const cause = e;
+      //@ts-ignore
       throw new UALAnchorError(message, type, cause);
     }
   }

@@ -207,7 +207,11 @@ class Anchor extends universal_authenticator_library_1.Authenticator {
                 }
             }
             catch (e) {
-                throw new UALAnchorError_1.UALAnchorError(e.message, universal_authenticator_library_1.UALErrorType.Login, e);
+                throw new UALAnchorError_1.UALAnchorError(
+                //@ts-ignore
+                e.message, universal_authenticator_library_1.UALErrorType.Login, 
+                //@ts-ignore
+                e);
             }
             return this.users;
         });

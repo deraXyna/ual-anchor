@@ -235,8 +235,10 @@ export class Anchor extends Authenticator {
       }
     } catch (e) {
       throw new UALAnchorError(
+        //@ts-ignore
         e.message,
         UALErrorType.Login,
+        //@ts-ignore
         e)
     }
     return this.users

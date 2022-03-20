@@ -127,6 +127,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     const message = "this.session.transact FAILED";
                     const type = universal_authenticator_library_1.UALErrorType.Signing;
                     const cause = e;
+                    //@ts-ignore
                     throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                 }
                 const request = {
@@ -163,6 +164,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                     if (!response.ok) {
                         throw new UALAnchorError_1.UALAnchorError("Failed to connect to endpoint", universal_authenticator_library_1.UALErrorType.Signing, null);
                     }
+                    //@ts-ignore
                     json = yield response.json();
                 }
                 // if (!response.ok) {
@@ -200,6 +202,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                         const message = "api.rpc.send_transaction FAILED";
                         const type = universal_authenticator_library_1.UALErrorType.Signing;
                         const cause = e;
+                        //@ts-ignore
                         throw new UALAnchorError_1.UALAnchorError(message, type, cause);
                     }
                 }
@@ -253,6 +256,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
         Please make sure your wallet is running.`;
                 const type = universal_authenticator_library_1.UALErrorType.DataRequest;
                 const cause = error;
+                //@ts-ignore
                 throw new UALAnchorError_1.UALAnchorError(message, type, cause);
             }
         });
@@ -269,12 +273,14 @@ class AnchorUser extends universal_authenticator_library_1.User {
                 }).length > 0);
             }
             catch (e) {
+                //@ts-ignore
                 if (e.constructor.name === "UALAnchorError") {
                     throw e;
                 }
                 const message = `Account validation failed for account ${this.accountName}.`;
                 const type = universal_authenticator_library_1.UALErrorType.Validation;
                 const cause = e;
+                //@ts-ignore
                 throw new UALAnchorError_1.UALAnchorError(message, type, cause);
             }
         });
