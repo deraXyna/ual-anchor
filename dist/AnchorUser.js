@@ -38,7 +38,7 @@ const eosjs_1 = require("eosjs");
 const UALAnchorError_1 = require("./UALAnchorError");
 const eosjs_numeric_1 = require("eosjs/dist/eosjs-numeric");
 // import { TextDecoder, TextEncoder } from "util";
-const httpEndpoint = "https://wax.greymass.com";
+const httpEndpoint = "https://wax.eosrio.io";
 const node_fetch_1 = __importDefault(require("node-fetch")); //node only
 // import axios from "axios"
 const rpc = new eosjs_1.JsonRpc(httpEndpoint, { fetch: node_fetch_1.default });
