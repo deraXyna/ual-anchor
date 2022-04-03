@@ -12,7 +12,7 @@ import { Api, JsonRpc } from "eosjs";
 import { UALAnchorError } from "./UALAnchorError";
 import { convertLegacyPublicKeys } from "eosjs/dist/eosjs-numeric";
 // import { TextDecoder, TextEncoder } from "util";
-const httpEndpoint = "https://wax.greymass.com";
+const httpEndpoint = "https://wax.eosrio.io";
 import fetch from "node-fetch"; //node only
 
 // import axios from "axios"
