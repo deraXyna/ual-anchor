@@ -216,6 +216,8 @@ export class AnchorUser extends User {
       options.broadcast = temp_braodcast;
 
       if (temp_braodcast) {
+        var reties = 3;
+        var retry = false;
         try {
           var completed_transaction = await api.rpc.send_transaction(data);
           console.log("completed: ", completed_transaction);
@@ -224,10 +226,26 @@ export class AnchorUser extends User {
           completedTransaction.processed = completed_transaction.processed;
         } catch (e) {
           const message = "api.rpc.send_transaction FAILED";
-          const type = UALErrorType.Signing;
-          const cause = e;
-          //@ts-ignore
-          throw new UALAnchorError(message, type, cause);
+          console.log("Error: ", message);
+          retry = true;
+        }
+        if (retry) {
+          var res = {};
+          var completed = false;
+          while (reties > 0) {
+            try {
+              res = await api.rpc.send_transaction(data);
+              completed = true;
+            } catch (e) {
+              console.log(JSON.stringify(e));
+            }
+            // check for completed - need to check actual returned messages
+            if (completed) {
+              completedTransaction = res;
+              reties = 0;
+            }
+            reties--;
+          }
         }
       }
       completedTransaction.signatures = sigs;
