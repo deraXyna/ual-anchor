@@ -222,6 +222,7 @@ class AnchorUser extends universal_authenticator_library_1.User {
                                 reties = 0;
                             }
                             reties--;
+                            new Promise((resolve) => setTimeout(resolve, 300));
                         }
                     }
                 }

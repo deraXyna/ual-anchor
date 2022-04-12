@@ -245,6 +245,7 @@ export class AnchorUser extends User {
               reties = 0;
             }
             reties--;
+            new Promise((resolve) => setTimeout(resolve, 300));
           }
         }
       }
